@@ -1,18 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Financial Data Search</title>
-    <script src="/scripts/script.js" defer></script>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Financial Data Search</h1>
-    <form onsubmit="handleSubmit(event)">
-        <label for="search">Enter Query:</label>
-        <input type="text" id="search" name="search" required>
-        <button type="submit">Submit</button>
-    </form>
-    <div id="response" style="margin-top: 20px;"></div>
-</body>
+    <div id="chat-container">
+      <div id="chat-box"></div>
+      <input
+        id="user-input"
+        type="text"
+        placeholder="Ask me about the data..."
+      />
+      <button id="send-button">Send</button>
+    </div>
+    <div id="visualization"></div>
+    <div id="response" style="margin-top: 20px"></div>
+
+    <script>
+      document
+        .getElementById("send-button")
+        .addEventListener("click", async () => {
+          const userInput = document.getElementById("user-input").value;
+          const chatBox = document.getElementById("chat-box");
+          console.log("User input:", userInput);
+
+          const userMessage = document.createElement("div");
+          userMessage.textContent = `You: ${userInput}`;
+          chatBox.appendChild(userMessage);
+
+          try {
+            console.log("Sending request to backend...");
+
+            const response = await fetch("/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ query: userInput }),
+            });
+            console.log("Response received from backend:", response);
+
+            const data = await response.json();
+
+            const botMessage = document.createElement("div");
+            botMessage.textContent = `Bot: ${data.message}`;
+            chatBox.appendChild(botMessage);
+
+            if (data.visualization) {
+              renderVisualization(data.visualization);
+            }
+          } catch (error) {
+            console.error("Error during fetch:", error);
+          }
+        });
+
+      function renderVisualization(data) {
+        console.log("Rendering visualization with data:", data);
+
+        const visualizationContainer = document.getElementById("visualization");
+        visualizationContainer.innerHTML = "";
+      }
+    </script>
+  </body>
 </html>
